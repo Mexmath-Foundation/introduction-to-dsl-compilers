@@ -1,0 +1,25 @@
+[project]
+name = "introduction-to-dsl-compilers"
+version = "0.1.0"
+description = "Course template for 'Introduction to DSL compilers'"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = []
+
+[dependency-groups]
+dev = [
+    "pytest>=8.3",
+    "hypothesis>=6.100",
+]
+
+[tool.pytest.ini_options]
+pythonpath = [
+    "topic-1",
+    "topic-2",
+    "topic-3",
+]
+testpaths = [
+    "topic-1",
+    "topic-2",
+    "topic-3",
+]
