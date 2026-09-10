@@ -30,6 +30,37 @@ must be explicitly stated in the submission.
 * Do not copy solutions from other students or from the internet.
 * You may (and should) consult textbooks and lecture materials to understand the algorithms.
 
+## Property-based testing and Hypothesis
+Classic example-based tests check a function against a handful of hardcoded input/output
+pairs. Such tests are easy to satisfy by accident — or by hardcoding — and they only ever
+cover the cases their author thought of.
+
+**Property-based testing** takes a different approach: instead of fixed examples, you state
+a *property* that must hold for **any** valid input, and the testing framework generates
+hundreds of random inputs trying to find one that breaks it. For a substring search, useful
+properties look like:
+* if we build a text by inserting the pattern at a known position, that position must be
+  among the reported occurrences;
+* if the text and the pattern are built from disjoint alphabets, no occurrence may be
+  reported;
+* every reported index, when used to slice the text, must yield the pattern.
+
+In this course we use [Hypothesis](https://hypothesis.readthedocs.io/), the standard
+property-based testing framework for Python. You describe how to generate inputs with
+*strategies* (`st.text()`, `st.integers()`, `st.lists()`, ...), attach them to a test with
+the `@given` decorator, and Hypothesis runs the test on many generated inputs. When it
+finds a failing input, it automatically *shrinks* it to a minimal counterexample — so a
+failure is reported as, say, `text='', pattern='a'` rather than a page of random noise.
+
+Recommended reading:
+* [Hypothesis documentation](https://hypothesis.readthedocs.io/)
+* [Quick start guide](https://hypothesis.readthedocs.io/en/latest/quickstart.html)
+* [What is property-based testing?](https://hypothesis.works/articles/what-is-property-based-testing/)
+
+The starter test suites in each topic are written with Hypothesis and demonstrate the
+constructive style described above. They are intentionally incomplete: extending them with
+your own properties is part of every assignment.
+
 # Prerequisites
 1. [Git](https://git-scm.com/downloads)
 2. [uv](https://docs.astral.sh/uv/getting-started/installation/) — the Python package and project manager used in this course. You do **not** need to install Python separately: `uv` downloads and manages the required Python version automatically.
