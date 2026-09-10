@@ -30,8 +30,8 @@ Tests must verify the properties of the algorithm, not hardcoded input/output pa
 1. `find_occurrences` is implemented as the KMP algorithm — including the prefix-function (failure-function) preprocessing step. Do not call built-in search helpers (`str.find`, `str.index`, `in`, `re`, etc.) to do the searching for you.
 2. All tests pass: `uv run pytest topic-2`.
 3. The starter test suite is extended with your own tests:
-   * additional example-based tests for edge cases;
-   * property-based tests using Hypothesis.
+   * example-based tests for edge cases;
+   * further Hypothesis property-based tests covering properties the starter suite does not.
 4. Code is readable, typed, and documented where behavior is not obvious.
 5. The solution is submitted as a pull request from the `topic-2` branch (see the root [README](../README.md)).
 
