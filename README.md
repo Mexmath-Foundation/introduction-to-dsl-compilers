@@ -61,7 +61,7 @@ private, and your solutions must not be publicly visible.
 
 To clone the repository, run:
 ```shell
-git clone https://github.com/IgorWolkov/introduction-to-dsl-compilers.git
+git clone https://github.com/Mexmath-Foundation/introduction-to-dsl-compilers.git
 cd introduction-to-dsl-compilers
 ```
 
@@ -72,8 +72,8 @@ git remote -v
 ```
 The output should be:
 ```shell
-origin	https://github.com/IgorWolkov/introduction-to-dsl-compilers.git (fetch)
-origin	https://github.com/IgorWolkov/introduction-to-dsl-compilers.git (push)
+origin	https://github.com/Mexmath-Foundation/introduction-to-dsl-compilers.git (fetch)
+origin	https://github.com/Mexmath-Foundation/introduction-to-dsl-compilers.git (push)
 ```
 
 Check the branches:
@@ -104,8 +104,8 @@ git remote rename origin course
 ```
 Run `git remote -v`. The output should be:
 ```shell
-course	https://github.com/IgorWolkov/introduction-to-dsl-compilers.git (fetch)
-course	https://github.com/IgorWolkov/introduction-to-dsl-compilers.git (push)
+course	https://github.com/Mexmath-Foundation/introduction-to-dsl-compilers.git (fetch)
+course	https://github.com/Mexmath-Foundation/introduction-to-dsl-compilers.git (push)
 ```
 
 #### Disable pushes
@@ -115,7 +115,7 @@ git remote set-url --push course DISABLED
 ```
 Run `git remote -v`. The output should be:
 ```shell
-course	https://github.com/IgorWolkov/introduction-to-dsl-compilers.git (fetch)
+course	https://github.com/Mexmath-Foundation/introduction-to-dsl-compilers.git (fetch)
 course	DISABLED (push)
 ```
 Now `git pull course main` still works (fetching updates is allowed), but any attempt to
@@ -130,7 +130,7 @@ git push -u origin main
 ```
 Run `git remote -v`. The output should be:
 ```shell
-course	https://github.com/IgorWolkov/introduction-to-dsl-compilers.git (fetch)
+course	https://github.com/Mexmath-Foundation/introduction-to-dsl-compilers.git (fetch)
 course	DISABLED (push)
 origin	https://github.com/<your GitHub account>/introduction-to-dsl-compilers.git (fetch)
 origin	https://github.com/<your GitHub account>/introduction-to-dsl-compilers.git (push)
