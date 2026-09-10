@@ -23,6 +23,12 @@ Your extended test suite must include property-based tests written with the
 [Hypothesis](https://hypothesis.readthedocs.io/) framework, in addition to example-based tests.
 Tests must verify the properties of the algorithm, not hardcoded input/output pairs only.
 
+Test data generation is kept separate from the tests: all inputs are produced by the
+composite strategies in [`naive_generators.py`](naive_generators.py), and the tests only
+assert the property each generator guarantees by construction. Follow the same structure
+in your own tests — generate data in the generators module, not inside the test functions.
+You are **encouraged to add more generators and more tests** of your own.
+
 ## Acceptance criteria
 1. `find_occurrences` is implemented as the naive algorithm — do not call built-in search helpers (`str.find`, `str.index`, `in`, `re`, etc.) to do the searching for you.
 2. All tests pass: `uv run pytest topic-1`.

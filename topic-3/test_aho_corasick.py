@@ -1,68 +1,65 @@
 """Starter test suite for Topic 3: Aho–Corasick multi-pattern search.
 
-Property-based tests written with Hypothesis: instead of hardcoding
-input/output pairs, each test constructs random inputs with a known
-property and checks that the property holds for the result.
+Property-based tests written with Hypothesis. All test data comes from
+the composite strategies in ``aho_generators.py`` — tests never build
+their inputs inline, they only assert the property the generator
+guarantees by construction.
 
 This suite is intentionally incomplete. It covers only a few obvious
-properties; you are expected to extend it — see topic-3/README.md.
+properties; you are expected to extend it (and the generators) — see
+topic-3/README.md.
 """
 
 from hypothesis import given
-from hypothesis import strategies as st
 
 from aho_corasick import find_occurrences
-
-
-@given(
-    prefix=st.text(),
-    pattern=st.text(min_size=1),
-    suffix=st.text(),
-    other_patterns=st.lists(st.text(min_size=1), max_size=4),
+from aho_generators import (
+    arbitrary_search_inputs,
+    texts_with_absent_patterns,
+    texts_with_pattern_inserted_many_times,
+    texts_with_pattern_inserted_once,
 )
-def test_pattern_inserted_at_known_position_is_found(
-    prefix: str, pattern: str, suffix: str, other_patterns: list[str]
-) -> None:
-    text = prefix + pattern + suffix
-    result = find_occurrences(text, [pattern, *other_patterns])
-    assert len(prefix) in result[pattern]
+
+# Completeness (one occurrence): the generator placed one tracked
+# pattern at a known position and mixed unrelated patterns into the
+# search set; the tracked pattern must be reported at that position.
+@given(case=texts_with_pattern_inserted_once())
+def test_pattern_inserted_at_known_position_is_found(case) -> None:
+    result = find_occurrences(case.text, case.patterns)
+    assert case.position in result[case.inserted_pattern]
 
 
-@given(parts=st.lists(st.text(), min_size=2, max_size=6), pattern=st.text(min_size=1))
-def test_pattern_inserted_several_times_is_found_at_every_insertion(
-    parts: list[str], pattern: str
-) -> None:
-    text = pattern.join(parts)
-    insertion_positions = []
-    position = 0
-    for part in parts[:-1]:
-        position += len(part)
-        insertion_positions.append(position)
-        position += len(pattern)
-
-    result = find_occurrences(text, [pattern])
-    for insertion_position in insertion_positions:
-        assert insertion_position in result[pattern]
+# Completeness (many occurrences): every deliberate insertion position
+# must be reported. Extra incidental matches are allowed — the seams
+# between fragments can accidentally form additional occurrences.
+@given(case=texts_with_pattern_inserted_many_times())
+def test_pattern_inserted_several_times_is_found_at_every_insertion(case) -> None:
+    result = find_occurrences(case.text, [case.pattern])
+    for position in case.positions:
+        assert position in result[case.pattern]
 
 
-@given(
-    text=st.text(alphabet="ab"),
-    patterns=st.lists(st.text(alphabet="xyz", min_size=1), min_size=1, max_size=5),
-)
-def test_patterns_from_disjoint_alphabet_are_never_found(
-    text: str, patterns: list[str]
-) -> None:
-    assert find_occurrences(text, patterns) == {pattern: [] for pattern in patterns}
+# Absence: the generator draws the text and all patterns from disjoint
+# alphabets, so every pattern must map to an empty list of indices.
+@given(case=texts_with_absent_patterns())
+def test_patterns_from_disjoint_alphabet_are_never_found(case) -> None:
+    expected = {pattern: [] for pattern in case.patterns}
+    assert find_occurrences(case.text, case.patterns) == expected
 
 
-@given(text=st.text(), patterns=st.lists(st.text(min_size=1), min_size=1, max_size=5))
-def test_every_pattern_is_present_in_the_result(text: str, patterns: list[str]) -> None:
-    assert set(find_occurrences(text, patterns)) == set(patterns)
+# Shape of the result: every requested pattern must be present as a
+# key, even when it does not occur in the text.
+@given(case=arbitrary_search_inputs())
+def test_every_pattern_is_present_in_the_result(case) -> None:
+    assert set(find_occurrences(case.text, case.patterns)) == set(case.patterns)
 
 
-@given(text=st.text(), patterns=st.lists(st.text(min_size=1), min_size=1, max_size=5))
-def test_reported_indices_actually_match(text: str, patterns: list[str]) -> None:
-    result = find_occurrences(text, patterns)
+# Soundness: for arbitrary inputs nothing is known about where the
+# patterns occur — but every index reported for a pattern must point
+# at a real occurrence of that pattern when the text is sliced there.
+@given(case=arbitrary_search_inputs())
+def test_reported_indices_actually_match(case) -> None:
+    result = find_occurrences(case.text, case.patterns)
     for pattern, indices in result.items():
         for index in indices:
-            assert text[index : index + len(pattern)] == pattern
+            assert case.text[index : index + len(pattern)] == pattern
