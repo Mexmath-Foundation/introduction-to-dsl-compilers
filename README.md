@@ -211,16 +211,41 @@ The project uses [Ruff](https://docs.astral.sh/ruff/) as the linter and code for
 The configuration lives in the `[tool.ruff]` section of [`pyproject.toml`](pyproject.toml).
 Both checks are enforced in the GitHub Actions build, so run them before pushing.
 
-To check the code:
+### Checking the formatting
+To check whether the code is properly formatted **without changing any files**, run:
 ```shell
-uv run ruff check .
 uv run ruff format --check .
 ```
+The command lists the files that would be reformatted and exits with a non-zero code
+if any file is not properly formatted. This is exactly the check the CI build runs.
 
-To fix what can be fixed automatically (lint autofixes and formatting):
+### Applying the formatting
+To automatically reformat all files according to the project code style, run:
+```shell
+uv run ruff format .
+```
+Run it (or set up your IDE to format with Ruff on save) before every commit.
+
+### Checking the code with the linter
+To check the code for lint violations (unused imports, unsorted imports, common bug
+patterns, outdated syntax, ...), run:
+```shell
+uv run ruff check .
+```
+
+### Fixing lint violations
+Many lint violations can be fixed automatically. To apply the automatic fixes, run:
 ```shell
 uv run ruff check --fix .
-uv run ruff format .
+```
+Violations that cannot be fixed automatically are reported with an explanation and a
+rule code; look the code up in the [Ruff rules reference](https://docs.astral.sh/ruff/rules/)
+to understand what to change.
+
+### One command to rule them all
+To apply the formatting, apply the automatic lint fixes, and verify both checks pass, run:
+```shell
+uv run ruff format . && uv run ruff check --fix .
 ```
 
 ## GitHub Actions build
