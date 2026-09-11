@@ -5,22 +5,45 @@ on:
   push:
     branches:
       - "topic-*"
+      - main
 
 jobs:
   test:
-    name: Run tests for the topic matching the branch name
+    name: Lint and run topic tests
     runs-on: ubuntu-latest
     steps:
       - name: Check out the repository
         uses: actions/checkout@v4
+        with:
+          # Full history is needed to diff the pushed commits on main.
+          fetch-depth: 0
 
-      - name: Determine the topic from the branch name
-        id: topic
+      - name: Determine the topics to test
+        id: topics
         env:
           # For pull requests github.ref_name is "<PR>/merge",
           # so take the source branch (head_ref) instead.
           BRANCH: ${{ github.head_ref || github.ref_name }}
+          BEFORE: ${{ github.event.before }}
         run: |
+          if [[ "$BRANCH" == "main" ]]; then
+            # A push to main is normally a merged topic pull request:
+            # run the tests for every topic folder the push touched.
+            # Topics not touched by the push are not tested, so still
+            # unsolved topics do not fail the build.
+            if [[ -n "$BEFORE" ]] && git cat-file -e "$BEFORE^{commit}" 2>/dev/null; then
+              changed=$(git diff --name-only "$BEFORE" "$GITHUB_SHA")
+            else
+              # First push or unknown base: fall back to the last commit.
+              changed=$(git diff --name-only "$GITHUB_SHA~1" "$GITHUB_SHA" 2>/dev/null || true)
+            fi
+            topics=$(printf '%s\n' "$changed" | grep -oE '^topic-[0-9]+' | sort -u | xargs || true)
+            if [[ -z "$topics" ]]; then
+              echo "No topic folders changed; running lint and format checks only."
+            fi
+            echo "topics=$topics" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
           if [[ ! "$BRANCH" =~ ^topic-[0-9]+$ ]]; then
             echo "::error::Branch '$BRANCH' does not follow the 'topic-N' naming convention (e.g. 'topic-1'). Rename the branch and push again."
             exit 1
@@ -29,7 +52,7 @@ jobs:
             echo "::error::Branch '$BRANCH' matches the naming convention, but the folder '$BRANCH' does not exist in the repository."
             exit 1
           fi
-          echo "topic=$BRANCH" >> "$GITHUB_OUTPUT"
+          echo "topics=$BRANCH" >> "$GITHUB_OUTPUT"
 
       - name: Install uv
         uses: astral-sh/setup-uv@v6
@@ -45,5 +68,9 @@ jobs:
       - name: Check formatting with Ruff
         run: uv run ruff format --check .
 
-      - name: Run tests for ${{ steps.topic.outputs.topic }}
-        run: uv run pytest "${{ steps.topic.outputs.topic }}"
+      - name: Run tests for ${{ steps.topics.outputs.topics }}
+        if: steps.topics.outputs.topics != ''
+        run: |
+          for topic in ${{ steps.topics.outputs.topics }}; do
+            uv run pytest "$topic"
+          done

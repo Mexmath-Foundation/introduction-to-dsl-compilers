@@ -224,12 +224,15 @@ uv run ruff format .
 ```
 
 ## GitHub Actions build
-Every push to a `topic-*` branch and every pull request triggers the CI build
+Every push to a `topic-*` branch, every pull request, and every push to `main`
+(e.g. a merged pull request) triggers the CI build
 (see [`.github/workflows/ci.yml`](.github/workflows/ci.yml)). The build:
-1. Extracts the topic name from the branch name and fails if the branch does not follow the `topic-N` convention.
+1. Determines which topics to test:
+   * on a `topic-*` branch or a pull request from one — the topic matching the branch name; the build fails if the branch does not follow the `topic-N` convention;
+   * on a push to `main` — every topic folder touched by the pushed commits, so merging the `topic-1` pull request re-runs the `topic-1` tests on `main`, while still unsolved topics are not tested.
 2. Installs the dependencies with `uv sync --locked`.
 3. Lints and checks formatting with `uv run ruff check .` and `uv run ruff format --check .`.
-4. Runs `uv run pytest <topic>` for the matching topic folder only.
+4. Runs `uv run pytest <topic>` for each selected topic folder.
 
 To replicate the CI behavior locally, run:
 ```shell
