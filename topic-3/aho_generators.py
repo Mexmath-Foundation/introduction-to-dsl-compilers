@@ -86,9 +86,7 @@ def texts_with_pattern_inserted_many_times(
         positions.append(position)
         position += len(pattern)
 
-    return TextWithPatternInsertedManyTimes(
-        text=text, pattern=pattern, positions=positions
-    )
+    return TextWithPatternInsertedManyTimes(text=text, pattern=pattern, positions=positions)
 
 
 @st.composite

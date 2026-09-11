@@ -21,6 +21,7 @@ Failure to comply with any of the following rules will result in the homework no
 * The code runs without errors.
 * Tests are implemented and extended beyond the starter suite, including Hypothesis property-based tests.
 * All tests for the topic pass, both locally and in the GitHub Actions build.
+* The code passes the [Ruff](https://docs.astral.sh/ruff/) lint and formatting checks (see [Code style](#code-style)).
 
 Students may submit incomplete homework to verify assumptions, but any incompleteness
 must be explicitly stated in the submission.
@@ -205,16 +206,36 @@ To run all tests in the repository (expected to fail until all topics are solved
 uv run pytest
 ```
 
+## Code style
+The project uses [Ruff](https://docs.astral.sh/ruff/) as the linter and code formatter.
+The configuration lives in the `[tool.ruff]` section of [`pyproject.toml`](pyproject.toml).
+Both checks are enforced in the GitHub Actions build, so run them before pushing.
+
+To check the code:
+```shell
+uv run ruff check .
+uv run ruff format --check .
+```
+
+To fix what can be fixed automatically (lint autofixes and formatting):
+```shell
+uv run ruff check --fix .
+uv run ruff format .
+```
+
 ## GitHub Actions build
 Every push to a `topic-*` branch and every pull request triggers the CI build
 (see [`.github/workflows/ci.yml`](.github/workflows/ci.yml)). The build:
 1. Extracts the topic name from the branch name and fails if the branch does not follow the `topic-N` convention.
 2. Installs the dependencies with `uv sync --locked`.
-3. Runs `uv run pytest <topic>` for the matching topic folder only.
+3. Lints and checks formatting with `uv run ruff check .` and `uv run ruff format --check .`.
+4. Runs `uv run pytest <topic>` for the matching topic folder only.
 
 To replicate the CI behavior locally, run:
 ```shell
 uv sync --locked
+uv run ruff check .
+uv run ruff format --check .
 uv run pytest topic-<n>
 ```
 

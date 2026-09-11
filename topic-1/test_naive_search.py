@@ -11,7 +11,6 @@ topic-1/README.md.
 """
 
 from hypothesis import given
-
 from naive_generators import (
     arbitrary_search_inputs,
     texts_with_absent_pattern,
@@ -19,6 +18,7 @@ from naive_generators import (
     texts_with_pattern_inserted_once,
 )
 from naive_search import find_occurrences
+
 
 # Completeness (one occurrence): the generator placed the pattern at a
 # known position, so that position must be among the reported indices.

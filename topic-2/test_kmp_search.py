@@ -11,7 +11,6 @@ topic-2/README.md.
 """
 
 from hypothesis import given
-
 from kmp_generators import (
     arbitrary_search_inputs,
     periodic_texts,
@@ -20,6 +19,7 @@ from kmp_generators import (
     texts_with_pattern_inserted_once,
 )
 from kmp_search import find_occurrences
+
 
 # Completeness (one occurrence): the generator placed the pattern at a
 # known position, so that position must be among the reported indices.

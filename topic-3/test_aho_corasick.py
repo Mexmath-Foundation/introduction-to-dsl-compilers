@@ -10,8 +10,6 @@ properties; you are expected to extend it (and the generators) — see
 topic-3/README.md.
 """
 
-from hypothesis import given
-
 from aho_corasick import find_occurrences
 from aho_generators import (
     arbitrary_search_inputs,
@@ -19,6 +17,8 @@ from aho_generators import (
     texts_with_pattern_inserted_many_times,
     texts_with_pattern_inserted_once,
 )
+from hypothesis import given
+
 
 # Completeness (one occurrence): the generator placed one tracked
 # pattern at a known position and mixed unrelated patterns into the
