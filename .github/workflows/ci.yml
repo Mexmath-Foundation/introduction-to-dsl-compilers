@@ -55,7 +55,8 @@ jobs:
           echo "topics=$BRANCH" >> "$GITHUB_OUTPUT"
 
       - name: Install uv
-        uses: astral-sh/setup-uv@v10
+        # setup-uv publishes only exact version tags (no floating "v10")
+        uses: astral-sh/setup-uv@v10.1.0
         with:
           enable-cache: true
 
