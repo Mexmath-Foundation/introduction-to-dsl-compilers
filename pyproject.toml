@@ -27,10 +27,12 @@ pythonpath = [
     "topic-2",
     "topic-3",
     "topic-4",
+    "topic-5",
 ]
 testpaths = [
     "topic-1",
     "topic-2",
     "topic-3",
     "topic-4",
+    "topic-5",
 ]

@@ -103,8 +103,8 @@ Two things to notice:
    * `_term` — add binary `/` next to `*`;
    * `_factor` — add unary `-` (the rule is recursive: `--1` must work).
 
-Tokens are small frozen dataclasses (`NumberToken`, `OperatorToken`, `LeftParen`,
-`RightParen`), and every rule function takes the list of tokens still to be read and
+Tokens are small frozen dataclasses (`NumberToken`, `OperatorToken`, `LeftParenthesis`,
+`RightParenthesis`), and every rule function takes the list of tokens still to be read and
 returns the tree it built together with the tokens it did not consume. The rules inspect
 the list with *structural pattern matching*:
 ```python

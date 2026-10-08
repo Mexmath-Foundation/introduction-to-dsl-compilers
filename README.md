@@ -283,3 +283,5 @@ uv run pytest topic-<n>
 * [Topic 1: Naive Substring Search](topic-1/README.md)
 * [Topic 2: Knuth–Morris–Pratt Substring Search](topic-2/README.md)
 * [Topic 3: Aho–Corasick Multi-Pattern Search](topic-3/README.md)
+* [Topic 4: Execution Plan Policy](topic-4/README.md)
+* [Topic 5: Syntax Trees for Arithmetic Expressions](topic-5/README.md)

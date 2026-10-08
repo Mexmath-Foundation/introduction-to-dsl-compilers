@@ -58,16 +58,16 @@ class OperatorToken:
 
 
 @dataclass(frozen=True)
-class LeftParen:
+class LeftParenthesis:
     position: int
 
 
 @dataclass(frozen=True)
-class RightParen:
+class RightParenthesis:
     position: int
 
 
-type Token = NumberToken | OperatorToken | LeftParen | RightParen
+type Token = NumberToken | OperatorToken | LeftParenthesis | RightParenthesis
 type Tokens = list[Token]
 
 
@@ -78,9 +78,9 @@ def token_text(token: Token) -> str:
             return str(value)
         case OperatorToken(symbol):
             return symbol
-        case LeftParen():
+        case LeftParenthesis():
             return "("
-        case RightParen():
+        case RightParenthesis():
             return ")"
     raise TypeError(f"not a token: {token!r}")
 
@@ -120,10 +120,10 @@ def tokenize(text: str) -> Tokens:
                 tokens.append(OperatorToken(symbol, index))
                 index += 1
             case "(":
-                tokens.append(LeftParen(index))
+                tokens.append(LeftParenthesis(index))
                 index += 1
             case ")":
-                tokens.append(RightParen(index))
+                tokens.append(RightParenthesis(index))
                 index += 1
             case char:
                 raise ValueError(f"unexpected character {char!r} at position {index}")
@@ -180,10 +180,10 @@ def _primary(tokens: Tokens) -> tuple[Expr, Tokens]:
     match tokens:
         case [NumberToken(value), *rest]:
             return Number(value), rest
-        case [LeftParen(), *rest]:
+        case [LeftParenthesis(), *rest]:
             inner, rest = _expression(rest)
             match rest:
-                case [RightParen(), *rest]:
+                case [RightParenthesis(), *rest]:
                     return inner, rest
                 case _:
                     raise ValueError(f"expected ')', found {describe(rest)}")
