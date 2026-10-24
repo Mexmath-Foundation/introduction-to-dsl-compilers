@@ -12,14 +12,15 @@ The course is split into topics. Each topic lives in its own folder: `topic-1`, 
 
 Each topic folder contains:
 * `README.md` — the task description and acceptance criteria;
-* a Python template file with the required function signature and an empty implementation;
+* template file(s) to complete — usually a Python module with the required function signature
+  and an empty implementation; for a DSL topic, a grammar and a program in the language;
 * a starter test suite — **intentionally incomplete**; extending it is part of the assignment.
 
 ### Requirements for submitting homework for review
 Failure to comply with any of the following rules will result in the homework not being reviewed:
 * The solution is submitted as a pull request from a branch named after the topic (`topic-1`, `topic-2`, ...).
 * The code runs without errors.
-* Tests are implemented and extended beyond the starter suite, including Hypothesis property-based tests.
+* Tests are implemented and extended beyond the starter suite, including Hypothesis property-based tests (unless the topic states otherwise).
 * All tests for the topic pass, both locally and in the GitHub Actions build.
 * The code passes the [Ruff](https://docs.astral.sh/ruff/) lint and formatting checks (see [Code style](#code-style)).
 
@@ -284,4 +285,4 @@ uv run pytest topic-<n>
 * [Topic 2: Knuth–Morris–Pratt Substring Search](topic-2/README.md)
 * [Topic 3: Aho–Corasick Multi-Pattern Search](topic-3/README.md)
 * [Topic 4: Execution Plan Policy](topic-4/README.md)
-* [Topic 5: Syntax Trees for Arithmetic Expressions](topic-5/README.md)
+* [Topic 5: An ATM Description Language in textX](topic-5/README.md)

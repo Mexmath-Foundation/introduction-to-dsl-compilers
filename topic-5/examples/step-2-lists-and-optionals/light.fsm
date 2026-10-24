@@ -1,0 +1,6 @@
+machine Light
+events tick, panic
+
+initial state Red
+state Green
+state Yellow

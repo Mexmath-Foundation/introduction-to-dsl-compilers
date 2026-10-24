@@ -1,0 +1,16 @@
+machine Light
+events tick, panic
+
+// red is the initial state
+initial state Red "Stop" {
+    after 30s
+    on tick -> Green      // on timer
+}
+state Green "Go" {
+    after 45s
+    on tick -> Yellow
+    on panic -> Red
+}
+state Yellow {
+    on tick -> Red
+}

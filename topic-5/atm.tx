@@ -1,0 +1,13 @@
+// Topic 5: the ATM description language.
+//
+// Implement the grammar described in topic-5/README.md. The rule names
+// Atm, Event, State, Transition and Action and their attribute names are
+// fixed: the tests read the model through them.
+// Action in particular must be one rule that assigns `kind` in each
+// alternative (see "The model" in README.md).
+//
+// The skeleton below parses only the first line of a description.
+
+Atm:
+    'atm' name=ID
+;

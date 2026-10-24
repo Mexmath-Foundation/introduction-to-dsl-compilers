@@ -1,0 +1,8 @@
+Machine:
+    'machine' name=ID
+    states+=State
+;
+
+State:
+    'state' name=ID
+;

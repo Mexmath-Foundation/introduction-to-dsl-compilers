@@ -1,0 +1,9 @@
+Machine:
+    'machine' name=ID
+    ('events' events+=ID[','])?
+    states+=State
+;
+
+State:
+    initial?='initial' 'state' name=ID
+;

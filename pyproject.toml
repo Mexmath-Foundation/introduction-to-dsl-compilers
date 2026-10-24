@@ -4,7 +4,7 @@ version = "0.1.0"
 description = "Course template for 'Introduction to DSL compilers'"
 readme = "README.md"
 requires-python = ">=3.12"
-dependencies = []
+dependencies = ["textX[cli]>=4.0,<5"]
 
 [dependency-groups]
 dev = [

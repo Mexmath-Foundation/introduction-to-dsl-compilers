@@ -1,207 +1,224 @@
-# Topic 5: Syntax Trees for Arithmetic Expressions
+# Topic 5: An ATM Description Language in textX
 
 ## TL;DR
-A compiler never works on text. The first thing it does is turn the text into a *syntax
-tree* — a structure that makes the meaning of the program explicit — and every later
-phase (checking, optimizing, generating code, evaluating) walks that tree. In this topic
-you complete a parser that builds syntax trees for arithmetic expressions.
-
-The template already parses `+`, `*`, integer literals and parentheses. You extend it to
-the full language: binary `-`, binary `/` and unary `-`. Run
+Design a small domain-specific language for describing how an ATM behaves, implement its
+grammar with [textX](https://textx.github.io/textX/), and then describe an ATM in it. The
+language is specified in words below; you turn the words into a grammar ([`atm.tx`](atm.tx))
+and write a concrete ATM in the language ([`atm.atm`](atm.atm)). Run
 ```shell
-uv run python topic-5/show_tree.py "1 + 2 * 3" "(1 + 2) * 3"
+uv run python topic-5/show_atm.py topic-5/atm.atm
 ```
-to see the tokens and the tree of any expression.
+to print the model your grammar builds from your description. On the untouched template
+this fails with `Expected 'atm'` at `1:1`: the skeleton grammar does not know comments yet,
+and `atm.atm` starts with one. The same goes for the other commands below; they start
+working as your grammar grows.
+
+This topic covers the language and its grammar only. The Python side (semantic rules the
+grammar cannot express, and an interpreter that runs an ATM) comes in later topics and
+builds on what you submit here.
+
+The [`examples/`](examples/README.md) folder contains the lecture's live-coding material: a
+traffic-light state machine built in six steps. Your ATM is a state machine too, so the
+examples show every textX mechanism you need. The ATM language is not a copy of the
+examples, though: read the specification carefully.
 
 ## The language
-An expression is built from non-negative integer literals (`0`, `42`, `007`), the binary
-operators `+ - * /`, unary minus, and parentheses. Whitespace between tokens is ignored.
-
-### Precedence and associativity
-| Level | Operators | Associativity | Example |
-|-------|-----------|---------------|---------|
-| 1 (loosest) | binary `+`, `-` | left | `1 - 2 - 3` is `(1 - 2) - 3` |
-| 2 | binary `*`, `/` | left | `8 / 4 / 2` is `(8 / 4) / 2` |
-| 3 (tightest) | unary `-` | prefix | `-2 * 3` is `(-2) * 3` |
-
-Unary minus binds tighter than any binary operator, so `-(2 * 3)` needs its parentheses.
-Unary minus may be stacked (`--1`) and may follow a binary operator (`1 - -2`, `2 * -3`).
-The tables are the single source of truth; they live in
-[`syntax_tree.py`](syntax_tree.py) as `BINARY_PRECEDENCE` and `UNARY_PRECEDENCE`.
-
-### Grammar
-The parser is a *recursive-descent* parser: one function per grammar rule, and each rule
-owns the operators of one precedence level — the deeper the rule, the tighter its
-operators bind.
+An ATM description is a text file (`.atm`). It declares a name, the events the ATM reacts
+to, and the states it can be in. Every state lists the transitions that lead out of it,
+and every transition may perform actions. This is a description of a **valid** ATM:
 ```
-expression := term   (("+" | "-") term)*
-term       := factor (("*" | "/") factor)*
-factor     := "-" factor | primary
-primary    := NUMBER | "(" expression ")"
+// A city bank ATM: one withdrawal per session.
+atm CityBank
+
+events card_inserted, pin_ok, pin_wrong, amount_entered, cash_taken, card_taken, cancel
+
+initial state Idle "Insert your card" {
+    on card_inserted -> EnterPin
+}
+
+state EnterPin "Enter your PIN" {
+    on pin_ok -> ChooseAmount
+    on pin_wrong -> EnterPin do show "Wrong PIN, try again"
+    on cancel -> ReturnCard do eject_card
+}
+
+state ChooseAmount "Choose the amount" {
+    on amount_entered -> TakeCash do dispense
+    on cancel -> ReturnCard do eject_card
+}
+
+state TakeCash "Take your cash" {
+    on cash_taken -> ReturnCard do eject_card
+}
+
+state ReturnCard "Take your card" {
+    on card_taken -> Idle do show "Thank you"
+}
 ```
-The `(... op ...)*` loops consume operands from left to right and fold each one into the
-tree built so far: that is what makes the binary operators left-associative.
 
-## The syntax tree
-The tree is made of three node kinds, defined as frozen dataclasses in
-[`syntax_tree.py`](syntax_tree.py):
+### Lexical elements
+* **Identifiers** (`ID`): the names of the ATM, its events and its states. textX's built-in
+  `ID` is what you want.
+* **Strings** (`STRING`): double-quoted text, used for state labels and `show` messages.
+  Use textX's built-in `STRING`; that it also accepts single quotes is fine.
+* **Comments**: from `//` to the end of the line, allowed anywhere whitespace is.
+* **Keywords**: `atm`, `events`, `initial`, `state`, `on`, `do`, and the four action
+  names. A misspelled or unknown action (`open_safe`) is therefore a syntax error. The words
+  `counters`, `inc` and `reset` are reserved for a later extension of the language. Do not
+  use any keyword as the name of an event or a state; this is a rule for the author of a
+  description, your grammar is not required to reject it. Whitespace and line breaks between
+  tokens do not matter.
 
-* `Number(value)` — an integer literal, always a leaf;
-* `BinaryOp(op, left, right)` — a binary operator applied to two subtrees;
-* `UnaryOp(op, operand)` — a prefix operator applied to one subtree.
+### Structure
+* **ATM**: the keyword `atm` and a name, then the events declaration, then one or more
+  states, in this order.
+* **Events**: the keyword `events` followed by one or more event names separated by
+  commas. Every event the ATM reacts to must be declared here.
+* **State**: the keyword `state`, a name, an optional label (a string), and a block in
+  braces holding zero or more transitions. The keyword `initial` before `state` marks the
+  state the ATM starts in.
+* **Transition**: `on`, an event name, `->`, a target state name, and optionally `do`
+  followed by one or more actions separated by commas.
+* **Action**: one of
+  * `eject_card` — return the card to the customer;
+  * `retain_card` — keep the card;
+  * `dispense` — pay out the requested amount;
+  * `show "message"` — display a message. `show` takes exactly one message; the other
+    actions take none.
 
-Two expressions with the same tree mean the same thing, however they were written:
-`1+2*3`, `1 + (2 * 3)` and `((1) + ((2) * (3)))` all produce the tree below. Conversely,
-the tree is where precedence becomes visible: there are no parentheses in a tree.
+The event in a transition and the target state are **references**: they must name a
+declared event and a declared state, and in the model they are the corresponding `Event`
+and `State` objects, not strings (see [`examples/step-3-references`](examples/step-3-references/README.md)).
+A transition that names an undeclared event or state is rejected by textX itself with
+`TextXSemanticError`; you get this check for free.
+
+The grammar also decides how many arguments an action takes: `show` without a message, or
+`dispense "100"`, is a syntax error.
+
+## The model
+The tests parse descriptions with your grammar and inspect the objects textX builds from
+it, so the rule names and their attribute names are part of the specification:
+
+| Rule | Attributes |
+|------|------------|
+| `Atm` | `name`; `events`, a list of `Event`; `states`, a list of `State` in the order written |
+| `Event` | `name` |
+| `State` | `name`; `initial`, a boolean; `label`, a string, `''` when absent; `transitions`, a list of `Transition` in the order written |
+| `Transition` | `event`, the `Event` object; `target`, the `State` object; `actions`, a list of `Action`, possibly empty |
+| `Action` | `kind`, one of `eject_card`, `retain_card`, `dispense`, `show`; `message`, the text shown by `show`, `''` for the others |
+
+`name` must stay `name`: link references resolve by it. Every contained object also has
+the `parent` attribute textX adds (see [`examples/step-1-minimal-grammar`](examples/step-1-minimal-grammar/README.md)).
+
+One hint about `Action`. The tests read `action.kind` and `action.message`, so every
+action must be an object of the single rule `Action`. A rule made of alternatives that are
+themselves rules (`Action: Show | Eject | ...`) produces several classes without those
+attributes and breaks the tests. Write one rule and assign `kind` in each alternative;
+textX allows assigning the same attribute in several alternatives of one rule:
 ```
-$ uv run python topic-5/show_tree.py "1 + 2 * 3" "(1 + 2) * 3"
-
-=== '1 + 2 * 3' ===
-BinaryOp +
-├── Number 1
-└── BinaryOp *
-    ├── Number 2
-    └── Number 3
-
-=== '(1 + 2) * 3' ===
-BinaryOp *
-├── BinaryOp +
-│   ├── Number 1
-│   └── Number 2
-└── Number 3
+Action:
+    kind='show' message=STRING
+  | kind='eject_card' | kind='retain_card' | kind='dispense'
+;
 ```
-Two things to notice:
-* **Negative numbers do not exist in the language.** `-5` is `UnaryOp("-", Number(5))`,
-  never `Number(-5)`; the `Number` class refuses negative values.
-* **Associativity is a tree shape.** `1 + 2 + 3` is `BinaryOp("+", BinaryOp("+", 1, 2), 3)`
-  and `1 + (2 + 3)` is a different tree, even though both evaluate to 6.
 
-### Examples
-| Expression | Tree |
-|------------|------|
-| `7` | `Number(7)` |
-| `1 + 2 * 3` | `BinaryOp("+", Number(1), BinaryOp("*", Number(2), Number(3)))` |
-| `(1 + 2) * 3` | `BinaryOp("*", BinaryOp("+", Number(1), Number(2)), Number(3))` |
-| `1 - 2 - 3` | `BinaryOp("-", BinaryOp("-", Number(1), Number(2)), Number(3))` |
-| `-1 + 2` | `BinaryOp("+", UnaryOp("-", Number(1)), Number(2))` |
-| `-(1 + 2)` | `UnaryOp("-", BinaryOp("+", Number(1), Number(2)))` |
-| `2 * -3` | `BinaryOp("*", Number(2), UnaryOp("-", Number(3)))` |
-| `--1` | `UnaryOp("-", UnaryOp("-", Number(1)))` |
-| `1 +` | `ValueError` — missing right operand |
-| `(1 + 2` | `ValueError` — unbalanced parentheses |
-| `1 2` | `ValueError` — two operands without an operator |
-| `1.5` | `ValueError` — only integer literals exist |
+## Your ATM
+Describe an ATM in [`atm.atm`](atm.atm). The state names and labels are yours to choose; the
+tests only look at the events, the actions and where the ATM ends up when they follow the
+transitions. The example ATM above is a starting point, not a solution: requirement 7 is
+something it does not do. Your ATM must:
+1. declare exactly these events: `card_inserted`, `pin_ok`, `pin_wrong`, `amount_entered`,
+   `cash_taken`, `card_taken`, `cancel`;
+2. have exactly one `initial` state, with a transition on `card_inserted`;
+3. on the happy path `card_inserted, pin_ok, amount_entered, cash_taken, card_taken`
+   perform `dispense` exactly once and then `eject_card` exactly once, and end up in its
+   initial state;
+4. on `pin_wrong` show a message (on that very transition) and keep waiting for the PIN,
+   so that a correct PIN still leads to a withdrawal;
+5. on `cancel` while waiting for the PIN or for the amount, eject the card without
+   dispensing anything; after `card_taken` it is ready for the next customer;
+6. have at least four states, a label on every state, and no state that cannot be reached
+   from the initial state by following transitions;
+7. after three wrong PINs in a row, retain the card (`retain_card`) instead of ejecting it,
+   and return to the initial state. The language has no counters yet, so count with states.
 
-## What is given and what you implement
-[`expression_parser.py`](expression_parser.py) has two stages:
-
-1. **`tokenize`** — the lexer. It is complete: it already knows every symbol of the
-   language, including `-` and `/`, and rejects any other character with `ValueError`.
-2. **`parse`** — the parser. The rule functions implement the grammar above with
-   `+` and `*` only; the places to extend are marked with `TODO`:
-   * `_expression` — add binary `-` next to `+`;
-   * `_term` — add binary `/` next to `*`;
-   * `_factor` — add unary `-` (the rule is recursive: `--1` must work).
-
-Tokens are small frozen dataclasses (`NumberToken`, `OperatorToken`, `LeftParenthesis`,
-`RightParenthesis`), and every rule function takes the list of tokens still to be read and
-returns the tree it built together with the tokens it did not consume. The rules inspect
-the list with *structural pattern matching*:
-```python
-match rest:
-    case [OperatorToken("+" as op), *rest]:  # starts with "+": bind the rest
-        ...
-    case _:  # anything else, including []
-        ...
+The tests follow your transitions with a deliberately tiny walker (`walk` in the test
+file): an event the current state has no transition for is ignored. Validate your ATM from
+the command line as well (the `textx` command takes explicit paths, so it runs from the
+repository root like everything else):
+```shell
+uv run textx check topic-5/atm.tx
+uv run textx check topic-5/atm.atm --grammar topic-5/atm.tx
 ```
-An empty list is the end of the input, so there is no special end token. Read the
-implemented rules first. Adding `-` and `/` is a matter of accepting one more symbol in a
-pattern once you see how `+` and `*` are folded; unary minus is the one place where you
-build a `UnaryOp` node, and the one place where you must decide what the operand of the
-minus is (hint: the grammar says).
 
-Any malformed input must raise `ValueError`: empty input, a missing operand, an
-unbalanced parenthesis, a token left over after the expression, an unknown character.
-Syntax errors are a separate channel from trees — garbage must never come back as a
-tree.
-
-## Helpers you can lean on
-[`syntax_tree.py`](syntax_tree.py) also contains two tree walkers, both fully implemented:
-* `render(tree)` turns a tree back into text, placing the **fewest** parentheses that
-  preserve the tree. For a correct parser `parse(render(tree)) == tree` for every tree —
-  this is the property the test generators are built on.
-* `pretty(tree)` draws the tree as in the listing above.
-
-Walking a tree with `match` statements, as these helpers do, is the pattern every later
-compiler phase follows; it is worth reading them. The tokenizer and the rule functions
-use `match` in the same way, on characters and on token lists.
-
-## Previewing generated expressions
+## Previewing generated descriptions
 Run
 ```shell
-uv run python topic-5/show_tree.py --generate
+uv run python topic-5/preview_atms.py
 ```
-to print a sample of the expressions the test generators produce for the full language —
-the kind of input your finished parser will face. Edit the examples at the top of the
-script while developing; it is a playground, not a test.
+to print samples of the descriptions the test generators produce: random names, labels,
+states with and without transitions, actions with and without arguments. This is what
+your grammar will be tested against.
 
 ## Testing
-You are required to **extend the test suite** in
-[`test_expression_parser.py`](test_expression_parser.py). The provided tests are
-**intentionally incomplete**: they cover only a few obvious properties. Passing them does
-**not** mean your solution is correct or complete.
+The starter suite in [`test_atm_language.py`](test_atm_language.py) has two kinds of tests.
 
-The suite is in two halves. The first half exercises the given part (`+`, `*`, numbers,
-parentheses) and passes as is; the second half exercises `-`, `/` and unary minus and
-fails until you implement them.
+**Example-based tests** parse fixed inputs: a minimal valid description, a few syntax
+errors, and your own ATM. You are required to **extend these**: add example-based tests for
+more syntax errors (a missing `}`, a label after the brace, a comma missing in the events
+list), for the lexical layer (comments in unusual places, unusual whitespace) and for
+anything your ATM does that the starter suite does not check. Note that the error tests
+pass on the empty skeleton, since a grammar that accepts nothing rejects everything; they
+only mean something once the valid-description tests pass too.
 
-Test data generation is kept separate from the tests: all inputs are produced by the
-composite strategies in [`tree_generators.py`](tree_generators.py). The central strategy,
-`expressions(binary_operators, unary_operators)`, generates a random tree over the given
-operators and renders it to text, returning both — the tree is the expected result of
-parsing the text, so the test only asserts `parse(text) == tree`. Follow the same
-structure in your own tests: generate data in the generators module, not inside the test
-functions.
+**Property-based tests** use [Hypothesis](https://hypothesis.readthedocs.io/). They are
+provided as they are; you do not have to write new ones. They must pass, so it is worth
+understanding what they do:
+* a strategy in [`atm_generators.py`](atm_generators.py) builds a random valid ATM as plain
+  Python data (`GeneratedAtm`, with its events, states, transitions and actions);
+* `render` writes that data in the DSL;
+* the test parses the text with *your* grammar and compares the model with the data it
+  was rendered from, so the expected answer is known by construction;
+* `atms_with_unknown_target` takes a valid ATM and points one transition at an undeclared
+  state, so a test can assert that textX rejects it.
 
-Ideas for generators and properties the starter suite does not cover:
-* texts with random whitespace inserted between tokens — the tree must not change;
-* fully parenthesized texts — redundant parentheses must not change the tree either;
-* `render(parse(text)) == text` for generated texts;
-* texts broken in one known place (a dropped `)`, a doubled operator, a trailing token)
-  — every one of them must raise `ValueError`.
+Adding your own strategies is extra credit. This relaxes the rule in the root README: for
+this topic, new Hypothesis tests are optional, example-based tests are mandatory.
+
+## What comes next
+Later topics continue with this language and your grammar:
+* semantic rules the grammar cannot express: exactly one `initial` state, unique names,
+  at most one transition per event in a state;
+* Python classes for the model and an interpreter that runs an ATM on a sequence of
+  events;
+* an extension with counters and guards, so that an ATM can retain the card after three
+  wrong PINs.
+
+The generators module already contains strategies for these (`atms_with_two_initial_states`,
+`atms_with_duplicate_transition`, `simulations`); they are not used by the Topic 5 tests.
 
 ## Useful links
-* [Abstract syntax tree](https://en.wikipedia.org/wiki/Abstract_syntax_tree) — the
-  concept in general.
-* [Recursive descent parser](https://en.wikipedia.org/wiki/Recursive_descent_parser) —
-  the parsing technique used by the template.
-* [Crafting Interpreters, "Parsing Expressions"](https://craftinginterpreters.com/parsing-expressions.html)
-  — a gentle, thorough walkthrough of exactly this kind of parser (in Java, but the
-  structure is identical).
-* [Python `match` statement](https://docs.python.org/3/tutorial/controlflow.html#match-statements)
-  — structural pattern matching, used by the tree walkers in `syntax_tree.py`.
+* [textX documentation](https://textx.github.io/textX/) — in particular the pages on
+  [grammar](https://textx.github.io/textX/grammar/) and
+  [metamodel](https://textx.github.io/textX/metamodel/).
+* [`examples/`](examples/README.md) — the lecture's live-coding steps.
 * [Hypothesis documentation](https://hypothesis.readthedocs.io/) — the property-based
-  testing framework used by the test suite; see
-  [`st.recursive`](https://hypothesis.readthedocs.io/en/latest/reference/strategies.html#hypothesis.strategies.recursive)
-  for how the tree generator is built.
+  testing framework used by the starter suite.
 
 ## Acceptance criteria
-1. `parse` in [`expression_parser.py`](expression_parser.py) handles the full language:
-   `+`, `-`, `*`, `/`, unary `-`, integer literals and parentheses, with the precedence
-   and associativity above, and raises `ValueError` for malformed input.
-2. The node classes and operator tables in [`syntax_tree.py`](syntax_tree.py) are used
-   as given: the tests compare trees structurally.
+1. [`atm.tx`](atm.tx) implements the language above, with the rule and attribute names from
+   "The model", and `uv run textx check topic-5/atm.tx` reports `OK`.
+2. [`atm.atm`](atm.atm) describes your ATM and satisfies the requirements in "Your ATM";
+   `uv run textx check topic-5/atm.atm --grammar topic-5/atm.tx` reports `OK`.
 3. All tests pass: `uv run pytest topic-5`.
-4. The starter test suite is extended with your own tests:
-   * example-based tests for edge cases;
-   * further Hypothesis property-based tests covering properties the starter suite does not.
-5. Code is readable, typed, and documented where behavior is not obvious.
-6. The solution is submitted as a pull request from the `topic-5` branch (see the root
+4. The starter suite is extended with your own example-based tests, as described in
+   "Testing" (new property-based tests are optional for this topic).
+5. The solution is submitted as a pull request from the `topic-5` branch (see the root
    [README](../README.md)).
 
 ## Rules
 * **Using AI code generation (ChatGPT, Claude, Copilot, or any similar tool) for this task is forbidden.**
-  Both the implementation and the tests must be written by you.
+  Both the grammar and the tests must be written by you.
 * Do not copy solutions from other students or from the internet.
-* You may (and should) consult textbooks, lecture materials, and the documentation linked
-  above to understand syntax trees and recursive-descent parsing.
+* You may (and should) consult the lecture materials, the examples in this folder and the
+  textX documentation linked above.

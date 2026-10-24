@@ -3,6 +3,24 @@ revision = 3
 requires-python = ">=3.12"
 
 [[package]]
+name = "arpeggio"
+version = "2.0.3"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/3b/58/ba011f3cf8291804ce80f9d81289ac15f0319a27f9d7e3c124aa5e4981cc/Arpeggio-2.0.3.tar.gz", hash = "sha256:9e85ad35cfc6c938676817c7ae9a1000a7c72a34c71db0c687136c460d12b85e", size = 766566, upload-time = "2025-09-12T12:45:20.594Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/84/4d/53b8186b41842f7a5e971b1d1c28e678364dcf841e4170f5d14d38ac1e2a/Arpeggio-2.0.3-py2.py3-none-any.whl", hash = "sha256:9374d9c531b62018b787635f37fd81c9a6ee69ef2d28c5db3cd18791b1f7db2f", size = 54656, upload-time = "2025-09-12T12:45:17.971Z" },
+]
+
+[[package]]
+name = "click"
+version = "8.5.0"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/c7/0e/7fa0ef50764b67090eca4114772a2abf8b6148198475e54c660b97caeee6/click-8.5.0.tar.gz", hash = "sha256:ba0d2089de75ea0310e2dde03160e6ca10009947fb95a182f9b54021bb272e34", size = 382235, upload-time = "2026-08-26T13:33:14.56Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/58/50/6c0d534c5f134586a8e1ba4e330569e32f057e33372ae556463212fb4cd3/click-8.5.0-py3-none-any.whl", hash = "sha256:255bc9599cf7748b4b1a446ccc735421bd08a2ae529a8b88597d3de5664ee360", size = 125251, upload-time = "2026-08-26T13:33:12.928Z" },
+]
+
+[[package]]
 name = "colorama"
 version = "0.4.6"
 source = { registry = "https://pypi.org/simple" }
@@ -96,6 +114,9 @@ wheels = [
 name = "introduction-to-dsl-compilers"
 version = "0.1.0"
 source = { virtual = "." }
+dependencies = [
+    { name = "textx", extra = ["cli"] },
+]
 
 [package.dev-dependencies]
 dev = [
@@ -105,6 +126,7 @@ dev = [
 ]
 
 [package.metadata]
+requires-dist = [{ name = "textx", extras = ["cli"], specifier = ">=4.0,<5" }]
 
 [package.metadata.requires-dev]
 dev = [
@@ -188,4 +210,21 @@ source = { registry = "https://pypi.org/simple" }
 sdist = { url = "https://files.pythonhosted.org/packages/e8/c4/ba2f8066cceb6f23394729afe52f3bf7adec04bf9ed2c820b39e19299111/sortedcontainers-2.4.0.tar.gz", hash = "sha256:25caa5a06cc30b6b83d11423433f65d1f9d76c4c6a0c90e3379eaa43b9bfdb88", size = 30594, upload-time = "2021-05-16T22:03:42.897Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/32/46/9cb0e58b2deb7f82b84065f37f3bffeb12413f947f9388e4cac22c4621ce/sortedcontainers-2.4.0-py2.py3-none-any.whl", hash = "sha256:a163dcaede0f1c021485e957a39245190e74249897e2ae4b2aa38595db237ee0", size = 29575, upload-time = "2021-05-16T22:03:41.177Z" },
+]
+
+[[package]]
+name = "textx"
+version = "4.4.0"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "arpeggio" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/aa/31/3c5e7373c0fba3362ddc59a0b1f68659b3b91bb4c2b4e6ff5eae2cb75f96/textx-4.4.0.tar.gz", hash = "sha256:a7b15a4698b503edde631d5227c0d0f6024898a86a7924b5fc741973305f9286", size = 63347, upload-time = "2026-07-08T19:55:44.023Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/81/23/30bd4ceab44b547f97fd88ce95eeef3f461cf357a49a32cc1c8c582eae8e/textx-4.4.0-py3-none-any.whl", hash = "sha256:f08071316d662d8dbecb0e8322510eeba71e89fa91c69a5278cbebfd1debde42", size = 68587, upload-time = "2026-07-08T19:55:42.137Z" },
+]
+
+[package.optional-dependencies]
+cli = [
+    { name = "click" },
 ]

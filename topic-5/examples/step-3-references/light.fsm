@@ -1,0 +1,13 @@
+machine Light
+events tick, panic
+
+initial state Red {
+    on tick -> Green
+}
+state Green {
+    on tick -> Yellow
+    on panic -> Red
+}
+state Yellow {
+    on tick -> Red
+}
