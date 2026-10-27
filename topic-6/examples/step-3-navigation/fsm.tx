@@ -1,0 +1,19 @@
+Machine:
+    'machine' name=ID
+    'events' events+=Event[',']
+    states+=State
+;
+
+Event:
+    name=ID
+;
+
+State:
+    initial?='initial' 'state' name=ID '{'
+        transitions*=Transition
+    '}'
+;
+
+Transition:
+    'on' event=[Event] '->' target=[State]
+;

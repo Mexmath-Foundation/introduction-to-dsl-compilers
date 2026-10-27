@@ -286,3 +286,4 @@ uv run pytest topic-<n>
 * [Topic 3: Aho–Corasick Multi-Pattern Search](topic-3/README.md)
 * [Topic 4: Execution Plan Policy](topic-4/README.md)
 * [Topic 5: An ATM Description Language in textX](topic-5/README.md)
+* [Topic 6: Semantic Rules for the ATM Language](topic-6/README.md)

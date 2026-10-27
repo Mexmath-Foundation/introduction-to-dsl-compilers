@@ -1,0 +1,11 @@
+machine Light {
+    events tick
+    initial state Red   { on tick -> Green }
+    state Green         { on tick -> Red }
+}
+machine Door {
+    events push
+    initial state Closed { on push -> Red }
+    state Open           { on push -> Closed }
+    state Green          { }
+}

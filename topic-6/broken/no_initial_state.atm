@@ -1,0 +1,28 @@
+// Rule 1: no state is marked initial. There is no culprit; the error points at the Atm
+// object, i.e. the `atm` keyword on line 3 (lines 1 and 2 are this comment).
+atm CityBank
+
+events card_inserted, pin_ok, pin_wrong, amount_entered, cash_taken, card_taken, cancel
+
+state Idle "Insert your card" {
+    on card_inserted -> EnterPin
+}
+
+state EnterPin "Enter your PIN" {
+    on pin_ok -> ChooseAmount
+    on pin_wrong -> EnterPin do show "Wrong PIN, try again"
+    on cancel -> ReturnCard do eject_card
+}
+
+state ChooseAmount "Choose the amount" {
+    on amount_entered -> TakeCash do dispense
+    on cancel -> ReturnCard do eject_card
+}
+
+state TakeCash "Take your cash" {
+    on cash_taken -> ReturnCard do eject_card
+}
+
+state ReturnCard "Take your card" {
+    on card_taken -> Idle do show "Thank you"
+}

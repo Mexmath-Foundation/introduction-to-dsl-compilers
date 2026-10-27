@@ -1,0 +1,4 @@
+machine Light
+events tick, panic
+initial state Red { after 30s  on tick -> Green }
+state Green { on tick -> Red  on panic -> Red }

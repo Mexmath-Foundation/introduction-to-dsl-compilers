@@ -1,0 +1,29 @@
+// Same language; the lookup rule is written in the grammar (RREL).
+Model:
+    machines+=Machine
+;
+
+Machine:
+    'machine' name=ID '{'
+        'events' events+=Event[',']
+        states+=State
+    '}'
+;
+
+Event:
+    name=ID
+;
+
+State:
+    initial?='initial' 'state' name=ID '{'
+        transitions*=Transition
+    '}'
+;
+
+// After `|`: a path from the reference. parent(Machine) climbs to the
+// nearest Machine; .states / .events is where to look. The `:ID` is
+// required when a path follows.
+Transition:
+    'on' event=[Event:ID|parent(Machine).events]
+    '->' target=[State:ID|parent(Machine).states]
+;

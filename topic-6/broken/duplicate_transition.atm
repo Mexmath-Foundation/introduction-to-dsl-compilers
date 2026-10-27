@@ -1,0 +1,28 @@
+// Rule 3: EnterPin has two transitions on cancel. The culprit is the second one.
+atm CityBank
+
+events card_inserted, pin_ok, pin_wrong, amount_entered, cash_taken, card_taken, cancel
+
+initial state Idle "Insert your card" {
+    on card_inserted -> EnterPin
+}
+
+state EnterPin "Enter your PIN" {
+    on pin_ok -> ChooseAmount
+    on pin_wrong -> EnterPin do show "Wrong PIN, try again"
+    on cancel -> ReturnCard do eject_card
+    on cancel -> Idle do retain_card
+}
+
+state ChooseAmount "Choose the amount" {
+    on amount_entered -> TakeCash do dispense
+    on cancel -> ReturnCard do eject_card
+}
+
+state TakeCash "Take your cash" {
+    on cash_taken -> ReturnCard do eject_card
+}
+
+state ReturnCard "Take your card" {
+    on card_taken -> Idle do show "Thank you"
+}

@@ -1,0 +1,28 @@
+// Rule 2: the event receipt_requested is declared twice. Neither declaration is referenced,
+// so textX cannot notice; the second declaration is the culprit.
+atm CityBank
+
+events card_inserted, pin_ok, pin_wrong, amount_entered, cash_taken, card_taken, cancel, receipt_requested, receipt_requested
+
+initial state Idle "Insert your card" {
+    on card_inserted -> EnterPin
+}
+
+state EnterPin "Enter your PIN" {
+    on pin_ok -> ChooseAmount
+    on pin_wrong -> EnterPin do show "Wrong PIN, try again"
+    on cancel -> ReturnCard do eject_card
+}
+
+state ChooseAmount "Choose the amount" {
+    on amount_entered -> TakeCash do dispense
+    on cancel -> ReturnCard do eject_card
+}
+
+state TakeCash "Take your cash" {
+    on cash_taken -> ReturnCard do eject_card
+}
+
+state ReturnCard "Take your card" {
+    on card_taken -> Idle do show "Thank you"
+}

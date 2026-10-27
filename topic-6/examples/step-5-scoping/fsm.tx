@@ -1,0 +1,26 @@
+// Two machines in one file. Transitions refer to states by name.
+Model:
+    machines+=Machine
+;
+
+Machine:
+    'machine' name=ID '{'
+        'events' events+=Event[',']
+        states+=State
+    '}'
+;
+
+Event:
+    name=ID
+;
+
+State:
+    initial?='initial' 'state' name=ID '{'
+        transitions*=Transition
+    '}'
+;
+
+// Default lookup: one global namespace per class, i.e. among ALL states.
+Transition:
+    'on' event=[Event] '->' target=[State]
+;

@@ -28,6 +28,7 @@ pythonpath = [
     "topic-3",
     "topic-4",
     "topic-5",
+    "topic-6",
 ]
 testpaths = [
     "topic-1",
@@ -35,4 +36,5 @@ testpaths = [
     "topic-3",
     "topic-4",
     "topic-5",
+    "topic-6",
 ]

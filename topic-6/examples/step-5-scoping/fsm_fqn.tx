@@ -1,0 +1,31 @@
+// Same language; a target may be a dotted name such as Door.Open.
+Model:
+    machines+=Machine
+;
+
+Machine:
+    'machine' name=ID '{'
+        'events' events+=Event[',']
+        states+=State
+    '}'
+;
+
+Event:
+    name=ID
+;
+
+State:
+    initial?='initial' 'state' name=ID '{'
+        transitions*=Transition
+    '}'
+;
+
+// FQN is a match rule for `Light.Green`-style names; the FQN() scope
+// provider (registered in Python) resolves them by walking the containment.
+FQN:
+    ID+['.']
+;
+
+Transition:
+    'on' event=[Event] '->' target=[State:FQN]
+;

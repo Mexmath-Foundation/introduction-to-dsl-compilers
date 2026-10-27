@@ -1,0 +1,13 @@
+// Topic 6: the ATM description language, as you implemented it in Topic 5.
+//
+// Copy your topic-5/atm.tx over this file. The semantic rules of this
+// topic are written against the model that grammar builds (rule and
+// attribute names from "The model" in topic-5/README.md); the grammar
+// itself should not need changes.
+//
+// Until you do, this is the Topic 5 skeleton: it parses only the first
+// line of a description.
+
+Atm:
+    'atm' name=ID
+;

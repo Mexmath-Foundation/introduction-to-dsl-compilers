@@ -1,0 +1,19 @@
+// Rule 2: two states named Welcome. Nothing refers to Welcome (it is the initial state),
+// so textX cannot notice the duplicate; a reference to it would have made textX report
+// the problem first, with its own message. The second declaration is the culprit.
+// A smaller machine than the ATM, because every state of the example ATM is referenced.
+atm Kiosk
+
+events touch, done
+
+initial state Welcome "Touch the screen" {
+    on touch -> Working
+}
+
+state Working "Please wait" {
+    on done -> Working
+}
+
+state Welcome "Touch the screen" {
+    on touch -> Working
+}
