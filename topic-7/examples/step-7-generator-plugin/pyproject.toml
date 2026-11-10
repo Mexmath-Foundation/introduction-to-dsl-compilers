@@ -1,0 +1,25 @@
+[project]
+name = "fsm-lang"
+version = "0.1.0"
+description = "The traffic-light FSM language of Topic 7 as a textX plugin: a registered language and a Mermaid generator"
+requires-python = ">=3.10"
+dependencies = ["textx>=4.0"]
+
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+packages = ["fsm_lang"]
+
+[tool.setuptools.package-data]
+fsm_lang = ["*.tx"]
+
+# textX finds languages and generators through these two entry-point groups.
+# After `pip install -e .` they appear in `textx list-languages` and
+# `textx list-generators`, and `textx generate x.fsm --target mermaid` works.
+[project.entry-points.textx_languages]
+fsm = "fsm_lang:fsm_language"
+
+[project.entry-points.textx_generators]
+fsm_mermaid = "fsm_lang:fsm_mermaid_generator"

@@ -26,3 +26,11 @@ venv/
 # textX generated diagrams (PNG fallbacks are committed)
 *.dot
 *.pu
+
+# Lecturer-only grading notes and review drafts; never committed
+grading/
+
+# Topic 7: build products of the homework CLI, if written next to the sources
+topic-7/atm.h
+topic-7/atm.c
+topic-7/atm.mmd

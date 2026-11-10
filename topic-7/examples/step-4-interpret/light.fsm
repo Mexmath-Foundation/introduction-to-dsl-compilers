@@ -1,0 +1,16 @@
+// The traffic light with actions on two transitions.
+machine Light
+events tick, panic
+
+initial state Red "Stop" {
+    after 30s
+    on tick -> Green do show "Go now"
+}
+state Green "Go" {
+    after 45s
+    on tick -> Yellow
+    on panic -> Red do show "Emergency", beep
+}
+state Yellow "Slow down; then stop" {
+    on tick -> Red
+}

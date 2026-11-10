@@ -1,0 +1,10 @@
+stateDiagram-v2
+    direction LR
+    [*] --> Red
+    state "Stop" as Red
+    Red --> Green : tick
+    state "Go" as Green
+    Green --> Yellow : tick
+    Green --> Red : panic
+    state "Slow down#59; then stop" as Yellow
+    Yellow --> Red : tick

@@ -1,0 +1,25 @@
+/* generated from {{ source }} by generate_jinja.py; do not edit */
+#include <stdio.h>
+#include "light.h"
+
+const char *state_name[] = { {{ m.states | map(attribute="name") | map("c_string") | join(", ") }} };
+const char *event_name[] = { {{ m.events | map(attribute="name") | map("c_string") | join(", ") }} };
+const enum state initial_state = {{ m.states | selectattr("initial") | first | C }};
+
+enum state step(enum state s, enum event e) {
+  switch (s) {
+{%- for s in m.states %}
+  case {{ s | C }}:
+  {%- for t in s.transitions %}
+    if (e == {{ t.event | C }}) {
+    {%- for a in t.actions %}
+      puts({{ ("show " ~ a.message) | c_string if a.kind == "show" else '"beep"' }});
+    {%- endfor %}
+      return {{ t.target | C }};
+    }
+  {%- endfor %}
+    return s;
+{%- endfor %}
+  default: return s;
+  }
+}

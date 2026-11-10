@@ -1,0 +1,16 @@
+// The traffic light of Topic 5, step 4: labels, timeouts, comments.
+machine Light
+events tick, panic
+
+initial state Red "Stop" {
+    after 30s
+    on tick -> Green
+}
+state Green "Go" {
+    after 45s
+    on tick -> Yellow
+    on panic -> Red
+}
+state Yellow "Slow down; then stop" {
+    on tick -> Red
+}

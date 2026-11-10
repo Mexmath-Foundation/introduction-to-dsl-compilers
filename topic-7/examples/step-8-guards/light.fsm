@@ -1,0 +1,18 @@
+// The traffic light with guards: `count` is how many cycles have run,
+// `night` is 1 after dark. The values come from outside the model.
+machine Light
+events tick, panic
+
+initial state Red "Stop" {
+    after 30s
+    on tick [count < 3 or night == 0] -> Green do show "Go now"
+    on tick -> Red do show "Closed for the night"
+}
+state Green "Go" {
+    after 45s
+    on tick -> Yellow
+    on panic [not (night == 1 and count * 2 >= 10)] -> Red do show "Say \"stop\" 100%", beep
+}
+state Yellow "Slow down; then stop" {
+    on tick -> Red
+}

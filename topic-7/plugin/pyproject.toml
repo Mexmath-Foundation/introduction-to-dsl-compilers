@@ -1,0 +1,24 @@
+[project]
+name = "atm-lang"
+version = "0.1.0"
+description = "The ATM description language of Topics 5-7 as a textX plugin: a registered language and its generators"
+requires-python = ">=3.10"
+dependencies = ["textx>=4.0"]
+
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+packages = ["atm_lang"]
+
+# textX discovers languages and generators through these two entry-point groups
+# (examples/step-7-generator-plugin explains them). The root pyproject.toml installs
+# this package as an editable path dependency, so `uv sync` is all it takes; after
+# changing THIS file (not the Python code) run `uv sync --reinstall-package atm-lang`.
+[project.entry-points.textx_languages]
+atm = "atm_lang:atm_language"
+
+[project.entry-points.textx_generators]
+atm_mermaid = "atm_lang:atm_mermaid_generator"
+atm_c = "atm_lang:atm_c_generator"

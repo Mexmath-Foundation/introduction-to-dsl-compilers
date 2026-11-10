@@ -1,0 +1,7 @@
+/* generated from {{ source }} by generate_jinja.py; do not edit */
+enum state { {{ m.states | map("C") | join(", ") }}, N_STATES };
+enum event { {{ m.events | map("C") | join(", ") }}, N_EVENTS };
+extern const char *state_name[];
+extern const char *event_name[];
+extern const enum state initial_state;
+enum state step(enum state s, enum event e);

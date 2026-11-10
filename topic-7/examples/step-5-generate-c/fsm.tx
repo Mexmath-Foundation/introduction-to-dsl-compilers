@@ -1,0 +1,34 @@
+Machine:
+    'machine' name=ID
+    'events' events+=Event[',']
+    states+=State
+;
+
+Event:
+    name=ID
+;
+
+State:
+    initial?='initial' 'state' name=ID (label=STRING)? '{'
+        ('after' timeout=Duration)?
+        transitions*=Transition
+    '}'
+;
+
+Duration:
+    /\d+(ms|s|m)/
+;
+
+// New in this step: a transition may perform actions, as in the ATM language.
+// One rule `Action` with a `kind` attribute, the shape Topic 5 asked for.
+Transition:
+    'on' event=[Event] '->' target=[State] ('do' actions+=Action[','])?
+;
+
+Action:
+    kind='show' message=STRING | kind='beep'
+;
+
+Comment:
+    /\/\/.*$/
+;

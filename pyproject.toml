@@ -4,7 +4,15 @@ version = "0.1.0"
 description = "Course template for 'Introduction to DSL compilers'"
 readme = "README.md"
 requires-python = ">=3.12"
-dependencies = ["textX[cli]>=4.0,<5"]
+dependencies = ["textX[cli]>=4.0,<5", "jinja2>=3.1", "fsm-lang", "atm-lang"]
+
+# Topic 7: two textX plugins installed from the repository, so that `textx generate`
+# knows the traffic-light language (examples, step 7) and the ATM language (the homework)
+# right after `uv sync`. Editable: code changes apply at once; after editing a plugin's
+# pyproject.toml run `uv sync --reinstall-package <name>`.
+[tool.uv.sources]
+fsm-lang = { path = "topic-7/examples/step-7-generator-plugin", editable = true }
+atm-lang = { path = "topic-7/plugin", editable = true }
 
 [dependency-groups]
 dev = [
@@ -29,6 +37,7 @@ pythonpath = [
     "topic-4",
     "topic-5",
     "topic-6",
+    "topic-7",
 ]
 testpaths = [
     "topic-1",
@@ -37,4 +46,5 @@ testpaths = [
     "topic-4",
     "topic-5",
     "topic-6",
+    "topic-7",
 ]

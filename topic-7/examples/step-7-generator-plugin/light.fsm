@@ -1,0 +1,17 @@
+// The traffic light with actions on two transitions. The panic message
+// contains a quote and a percent sign on purpose: see c_string() in generate_c.py.
+machine Light
+events tick, panic
+
+initial state Red "Stop" {
+    after 30s
+    on tick -> Green do show "Go now"
+}
+state Green "Go" {
+    after 45s
+    on tick -> Yellow
+    on panic -> Red do show "Say \"stop\" 100%", beep
+}
+state Yellow "Slow down; then stop" {
+    on tick -> Red
+}

@@ -1,0 +1,28 @@
+Machine:
+    'machine' name=ID
+    'events' events+=Event[',']
+    states+=State
+;
+
+Event:
+    name=ID
+;
+
+State:
+    initial?='initial' 'state' name=ID (label=STRING)? '{'
+        ('after' timeout=Duration)?
+        transitions*=Transition
+    '}'
+;
+
+Duration:
+    /\d+(ms|s|m)/
+;
+
+Transition:
+    'on' event=[Event] '->' target=[State]
+;
+
+Comment:
+    /\/\/.*$/
+;

@@ -1,0 +1,68 @@
+Machine:
+    'machine' name=ID
+    'events' events+=Event[',']
+    states+=State
+;
+
+Event:
+    name=ID
+;
+
+State:
+    initial?='initial' 'state' name=ID (label=STRING)? '{'
+        ('after' timeout=Duration)?
+        transitions*=Transition
+    '}'
+;
+
+Duration:
+    /\d+(ms|s|m)/
+;
+
+// New in this step: an optional guard in square brackets. The transition is
+// taken only when the guard is true; the guard is an expression over named
+// variables that the interpreter (or the generated program) supplies.
+Transition:
+    'on' event=[Event] ('[' guard=Expr ']')? '->' target=[State] ('do' actions+=Action[','])?
+;
+
+Action:
+    kind='show' message=STRING | kind='beep'
+;
+
+// An expression grammar by precedence levels, lowest first. Every level has
+// the same shape -- a list of operands with the operators between them -- so
+// one Visitor method per level folds the list. A single `count < 3` yields
+// Or(And(Cmp(Sum(Term(Var)), "<", Sum(Term(Int))))): textX creates an object
+// for every level it passed through; the visitor methods treat the
+// one-operand case as "return the operand".
+//
+// Assignments use `=`, not `+=`: in textX `x+=Rule` means "match Rule ONE OR
+// MORE times", so `operands+=Sum` would also accept `count 3` (two operands,
+// no operator) and would eat `or` as a variable in `3 or night`. Repeating
+// `operands=` inside the `( ... )*` group is textX's way to collect a list.
+Expr: Or;
+
+Or:  operands=And ('or' operands=And)*;
+And: operands=Not ('and' operands=Not)*;
+Not: NotExpr | Cmp;          // abstract: textX returns whichever matched
+NotExpr: 'not' operand=Not;  // ('not' operand=Not | Cmp in ONE rule would
+                             //  create a Not object with operand=None for a Cmp)
+Cmp: operands=Sum (ops=CmpOp operands=Sum)*;
+CmpOp: '<=' | '>=' | '==' | '!=' | '<' | '>';
+Sum:  operands=Term (ops=SumOp operands=Term)*;
+SumOp: '+' | '-';
+Term: operands=Factor (ops=TermOp operands=Factor)*;
+TermOp: '*' | '/';
+Factor: Int | Var | '(' Expr ')';
+Int: value=INT;
+// ID also matches `or`, `and`, `not`. With the `=` shape above the parser
+// never tries Var where a keyword stands, but a guard such as `[or < 3]`
+// would still parse with a variable named "or"; the negative lookahead
+// rejects it. Keywords are not reserved in textX unless you say so.
+Var: !Keyword name=ID;
+Keyword: 'or' | 'and' | 'not';
+
+Comment:
+    /\/\/.*$/
+;
