@@ -104,6 +104,7 @@ tests and `check_atm.py` call it:
 | `load_atm(text)` | parses a description from a string: `metamodel().model_from_str(text)` |
 | `load_atm_file(path)` | parses a description from a file, so that errors carry the file name |
 
+<!-- Course convention: object-processor functions in `atm_rules.py` end with `_op` and model-processor functions with `_mp`, e.g. `one_transition_per_event_op`. -->
 Write one function per rule (a rule is a few lines over the model: a loop, a set, a
 worklist walk over `target` links) and register them in `metamodel`, keeping in mind that
 object processors are registered once, in one call. The skeleton registers nothing and

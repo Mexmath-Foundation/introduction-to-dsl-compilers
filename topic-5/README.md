@@ -69,6 +69,7 @@ state ReturnCard "Take your card" {
   description, your grammar is not required to reject it. Whitespace and line breaks between
   tokens do not matter.
 
+<!-- Course convention: in `.tx` files the root rule is preceded by the comment line `// root rule`. -->
 ### Structure
 * **ATM**: the keyword `atm` and a name, then the events declaration, then one or more
   states, in this order.

@@ -102,6 +102,7 @@ extern const char *event_name[];                        /* "card_inserted", ... 
 extern const enum state initial_state;
 enum state step(enum state s, enum event e);
 ```
+<!-- Course convention: generated C headers use the include guard `ATM_LANG_H`. -->
 Prefix the constants (`S_`, `E_`): a state and an event may share a name, and a name may
 be a C keyword. `atm.c` includes `"atm.h"`, defines the tables and `step`: a `switch` over
 states, an `if` per transition that performs the actions and returns the target, `return s`
