@@ -4,7 +4,13 @@ version = "0.1.0"
 description = "Course template for 'Introduction to DSL compilers'"
 readme = "README.md"
 requires-python = ">=3.12"
-dependencies = ["textX[cli]>=4.0,<5", "jinja2>=3.1", "fsm-lang", "atm-lang"]
+dependencies = [
+    "textX[cli]>=4.0,<5",
+    "jinja2>=3.1",
+    "fsm-lang",
+    "atm-lang",
+    "mmdc>=0.7.0",
+]
 
 # Topic 7: two textX plugins installed from the repository, so that `textx generate`
 # knows the traffic-light language (examples, step 7) and the ATM language (the homework)
